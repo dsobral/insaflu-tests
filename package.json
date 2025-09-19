@@ -1,0 +1,42 @@
+{
+  "name": "insaflu-tests",
+  "version": "1.0.0",
+  "description": "Comprehensive Playwright testing suite for INSaFLU platform - automated functional tests for genomic surveillance workflows",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:auth": "playwright test tests/auth",
+    "test:upload": "playwright test tests/data-upload",
+    "test:projects": "playwright test tests/projects",
+    "test:datasets": "playwright test tests/datasets",
+    "report": "playwright show-report reports/html-report",
+    "codegen": "playwright codegen",
+    "setup": "./scripts/install-deps.sh",
+    "setup:deps": "npx playwright install-deps",
+    "setup:browsers": "npx playwright install",
+    "test:ci": "CI=true playwright test --reporter=line",
+    "test:quick": "playwright test tests/auth/login.spec.ts --project=chromium"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "e2e",
+    "insaflu",
+    "genomics",
+    "bioinformatics",
+    "automation",
+    "quality-assurance"
+  ],
+  "author": "Daniel Sobral",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.5.2",
+    "dotenv": "^17.2.2",
+    "typescript": "^5.9.2"
+  }
+}

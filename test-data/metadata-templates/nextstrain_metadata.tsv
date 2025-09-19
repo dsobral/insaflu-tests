@@ -1,0 +1,8 @@
+strain	collection_date	country	division	location	host	age	sex
+SRR19847034	2022-01-15	Portugal	Porto	Porto	human	45	male
+SRR19847193	2022-01-16	Portugal	Porto	Porto	human	32	female
+SRR19847194	2022-01-17	Portugal	Porto	Porto	human	28	male
+influenza_01	2022-01-15	Portugal	Porto	Porto	human	45	male
+influenza_02	2022-01-16	Portugal	Porto	Porto	human	32	female
+influenza_03	2022-01-17	Portugal	Porto	Porto	human	28	male
+influenza_04	2022-01-18	Portugal	Porto	Porto	human	35	female
