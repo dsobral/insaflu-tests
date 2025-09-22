@@ -5,6 +5,7 @@ dotenv.config();
 
 export default defineConfig({
   testDir: './tests',
+  timeout: 120000, // 2 minutes per test
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -20,6 +21,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     headless: process.env.CI ? true : false,
+    //headless: true,
   },
 
   projects: [

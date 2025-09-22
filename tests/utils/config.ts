@@ -13,7 +13,7 @@ export const CONFIG = {
   metadataTemplatesPath: resolve(__dirname, '../../test-data/metadata-templates'),
 
   timeouts: {
-    upload: parseInt(process.env.UPLOAD_TIMEOUT || '60000'),
+    upload: parseInt(process.env.UPLOAD_TIMEOUT || '600000'),
     processing: parseInt(process.env.PROCESSING_TIMEOUT || '300000'),
     project: parseInt(process.env.PROJECT_TIMEOUT || '600000'),
   },

@@ -67,9 +67,9 @@ export class AuthHelper {
       // Wait for any of these success indicators
       await Promise.race([
         this.page.waitForSelector('#id_user_name', { timeout }), // User dropdown
-        this.page.waitForSelector('text=Samples', { timeout }),
-        this.page.waitForSelector('text=Projects', { timeout }),
-        this.page.waitForSelector('text=Dashboard', { timeout })
+        //this.page.waitForSelector('text=Samples', { timeout }),
+        //this.page.waitForSelector('text=Projects', { timeout }),
+        //this.page.waitForSelector('text=Dashboard', { timeout })
       ]);
       return true;
     } catch {

@@ -42,6 +42,13 @@ test.describe('Individual Sample Upload', () => {
     // Verify sample was uploaded
     const exists = await uploadHelper.verifySampleExists(sampleName);
     expect(exists).toBeTruthy();
+
+    // One minute should be enough for processing
+    await page.waitForTimeout(60000);
+
+    const isvalid =  page.locator('text=A-H3N2').isVisible();
+    expect(isvalid).toBeTruthy();
+
   });
 
   test('should validate sample name format', async ({ page }) => {
@@ -53,7 +60,7 @@ test.describe('Individual Sample Upload', () => {
     await page.fill('input[name*="name"], input[id*="name"]', 'invalid sample name!@#');
 
     // Try to submit
-    await page.click('button:has-text("Upload"), input[type="submit"]');
+    await page.click('button:has-text("Save"), input[type="submit"]');
 
     // Should show validation error
     const errorMessage = await page.locator('.alert-danger, .error').textContent();

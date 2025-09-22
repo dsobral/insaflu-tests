@@ -6,7 +6,9 @@ export class DataUploadHelper {
   constructor(private page: Page) {}
 
   async navigateToSamples() {
-    await this.page.click('text=Samples');
+    await this.page.click('a[href="/managing_files/samples/samples"].nav-link');
+    await this.page.waitForLoadState('networkidle');
+    await this.page.click('text=Add Samples');
     await this.page.waitForLoadState('networkidle');
   }
 
@@ -14,7 +16,9 @@ export class DataUploadHelper {
     await this.navigateToSamples();
 
     // Click "Add Multiple Samples / Load new file"
-    await this.page.click('text=Add Multiple Samples');
+
+    await this.page.click('a[href="/managing_files/samples/sample_add_file"].nav-link');
+    //await this.page.click('text=Add Multiple Samples');
     await this.page.waitForLoadState('networkidle');
 
     const metadataPath = resolve(CONFIG.metadataTemplatesPath, metadataFile);
@@ -40,25 +44,34 @@ export class DataUploadHelper {
     await this.navigateToSamples();
 
     // Click "Add One Sample"
-    await this.page.click('text=Add One Sample');
+    await this.page.click('text= Add One Sample ');
+    //await this.page.click('a[href="/managing_files/samples/sample_add"].nav-link');
     await this.page.waitForLoadState('networkidle');
 
     // Fill sample name
     await this.page.fill('input[name*="name"], input[id*="name"]', sampleName);
 
     // Upload FASTQ file(s)
-    const fastqPath = resolve(CONFIG.paths.sarsOnt, fastqFile);
-    const fastqInput = this.page.locator('input[type="file"]').first();
+    let fastqPath: string;
+    //const fastqPath = resolve(CONFIG.paths.sarsOnt, fastqFile);
+    if (fastqFile.includes('influenza')) {
+      fastqPath = resolve(CONFIG.paths.influenzaIllumina, fastqFile);
+    } else {
+      fastqPath = resolve(CONFIG.paths.sarsOnt, fastqFile);
+    }
+    //const fastqInput = this.page.locator('input[type="file"]').first();
+    const fastqInput = this.page.locator('input[type="file"], input[name*="path_name_1"]').first();
     await fastqInput.setInputFiles(fastqPath);
 
     if (fastqFile2) {
       const fastqPath2 = resolve(CONFIG.paths.influenzaIllumina, fastqFile2);
-      const fastqInput2 = this.page.locator('input[type="file"]').last();
+      //const fastqInput2 = this.page.locator('input[type="file"], input[name*="path_name_2"]').last();
+      const fastqInput2 = this.page.locator('input[type="file"], input[name*="path_name_2"]').first();
       await fastqInput2.setInputFiles(fastqPath2);
     }
 
     // Submit the form
-    await this.page.click('button:has-text("Upload"), input[type="submit"]');
+    await this.page.click('input[name*="save"], input[type="submit"]');
 
     // Wait for upload completion
     await this.waitForUploadCompletion();
@@ -86,7 +99,7 @@ export class DataUploadHelper {
     }
 
     // Submit the form
-    await this.page.click('button:has-text("Upload"), input[type="submit"]');
+    await this.page.click('button:has-text("Save"), input[type="submit"]');
 
     // Wait for upload completion
     await this.waitForUploadCompletion();
