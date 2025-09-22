@@ -6,10 +6,10 @@ dotenv.config();
 export default defineConfig({
   testDir: './tests',
   timeout: 120000, // 2 minutes per test
-  fullyParallel: true,
+  fullyParallel: false, // Tests in this suite are not fully independent
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1, // Run tests sequentially to avoid conflicts
   reporter: [
     ['html', { outputFolder: 'reports/html-report' }],
     ['json', { outputFile: 'reports/test-results.json' }],
