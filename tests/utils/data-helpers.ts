@@ -77,13 +77,18 @@ export class DataUploadHelper {
     await this.waitForUploadCompletion();
   }
 
-  async uploadReference(fastaFile: string, genbankFile?: string) {
-    await this.page.click('text=References');
+  async uploadReference(referenceName: string, fastaFile: string, genbankFile?: string) {
+
+    await this.page.click('a[href="/managing_files/references-index"].nav-link');
+    await this.page.waitForLoadState('networkidle');
+    await this.page.click('a[href="/managing_files/references/references"]');    
     await this.page.waitForLoadState('networkidle');
 
-    // Click "Add Reference"
     await this.page.click('text=Add Reference');
     await this.page.waitForLoadState('networkidle');
+
+    // Fill sample name
+    await this.page.fill('input[name*="name"], input[id*="name"]', referenceName);
 
     const fastaPath = resolve(CONFIG.paths.reference, fastaFile);
 
@@ -105,6 +110,7 @@ export class DataUploadHelper {
     await this.waitForUploadCompletion();
   }
 
+  // This may be a bit useless... TODO check if it can be improved
   async waitForUploadCompletion(timeout = CONFIG.timeouts.upload) {
     // Wait for success message or redirect
     await this.page.waitForTimeout(2000); // Give initial upload time
