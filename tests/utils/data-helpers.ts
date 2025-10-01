@@ -17,8 +17,11 @@ export class DataUploadHelper {
 
     // Click "Add Multiple Samples / Load new file"
 
-    await this.page.click('a[href="/managing_files/samples/sample_add_file"].nav-link');
-    //await this.page.click('text=Add Multiple Samples');
+    //await this.page.click('a[href="/managing_files/samples/sample_add_file"].nav-link');
+    await this.page.click('text=Add Multiple Samples');
+    await this.page.waitForLoadState('networkidle');
+
+    await this.page.click('text=Load new file');
     await this.page.waitForLoadState('networkidle');
 
     const metadataPath = resolve(CONFIG.metadataTemplatesPath, metadataFile);
@@ -28,13 +31,28 @@ export class DataUploadHelper {
     const metadataInput = this.page.locator('input[type="file"]').first();
     await metadataInput.setInputFiles(metadataPath);
 
+    // Submit the form
+    await this.page.click('button:has-text("Upload"), input[type="submit"]');
+
+    // Wait a bit for the metadata to be processed
+    await this.page.waitForTimeout(1000);
+
+    await this.navigateToSamples();
+
+    await this.page.click('text=Add Fastq Files');
+    await this.page.waitForLoadState('networkidle');
+
+    await this.page.click('text=Upload fastq.gz files');
+    await this.page.waitForLoadState('networkidle');
+
+
     // Upload FASTQ files
     const fastqInput = this.page.locator('input[type="file"]').last();
     const fastqPaths = fastqFiles.map(file => resolve(samplePath, file));
     await fastqInput.setInputFiles(fastqPaths);
 
     // Submit the form
-    await this.page.click('button:has-text("Upload"), input[type="submit"]');
+    //await this.page.click('button:has-text("Upload"), input[type="submit"]');
 
     // Wait for upload completion
     await this.waitForUploadCompletion();
@@ -135,6 +153,7 @@ export class DataUploadHelper {
 
   async verifySampleExists(sampleName: string): Promise<boolean> {
     await this.navigateToSamples();
+    await this.page.waitForTimeout(1000);
     return await this.page.locator(`text=${sampleName}`).isVisible();
   }
 

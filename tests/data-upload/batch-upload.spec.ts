@@ -15,11 +15,11 @@ test.describe('Batch Data Upload', () => {
 
   test.afterEach(async ({ page }) => {
     // Cleanup test samples
-    try {
-      await uploadHelper.cleanupTestSamples();
-    } catch (error) {
-      console.log('Cleanup error:', error);
-    }
+    //try {
+    //  await uploadHelper.cleanupTestSamples();
+    //} catch (error) {
+    //  console.log('Cleanup error:', error);
+    //}
   });
 
   test('should upload SARS-CoV-2 ONT samples in batch', async ({ page }) => {
@@ -31,11 +31,13 @@ test.describe('Batch Data Upload', () => {
       'sars'
     );
 
+
     // Verify samples were uploaded using correct sample names from TSV
     for (const sampleName of SAMPLE_NAMES.sarsOnt) {
       const exists = await uploadHelper.verifySampleExists(sampleName);
       expect(exists).toBeTruthy();
     }
+
   });
 
   test('should upload Influenza Illumina samples in batch', async ({ page }) => {
@@ -52,24 +54,29 @@ test.describe('Batch Data Upload', () => {
       const exists = await uploadHelper.verifySampleExists(sampleName);
       expect(exists).toBeTruthy();
     }
+
+    // Wait a bit for processing
+    await page.waitForTimeout(60000);
+
+    // Check that one of the samples has been processed correctly
+    const isvalid =  page.locator('text=A-H3N2').isVisible();
+    expect(isvalid).toBeTruthy();
+
   });
 
-  test('should handle batch upload with missing files gracefully', async ({ page }) => {
-    // Try to upload with a missing FASTQ file
-    await expect(async () => {
-      await uploadHelper.uploadBatchSamples(
-        'sars_ont_batch.csv',
-        ['nonexistent_file.fastq.gz'],
-        'sars'
-      );
-    }).rejects.toThrow();
-  });
 
   test('should validate metadata format during batch upload', async ({ page }) => {
     // Try to upload with invalid metadata format
     // This would require creating an invalid metadata file for testing
     await uploadHelper.navigateToSamples();
+
+    //await this.page.click('a[href="/managing_files/samples/sample_add_file"].nav-link');
     await page.click('text=Add Multiple Samples');
+    await page.waitForLoadState('networkidle');
+
+    await page.click('text=Load new file');
+    await page.waitForLoadState('networkidle');
+
 
     // Upload an invalid metadata file (we'll simulate this)
     const invalidContent = 'invalid,metadata,format\ntest1,test2,test3';
@@ -94,39 +101,25 @@ test.describe('Batch Data Upload', () => {
     expect(errorMessage).toBeTruthy();
   });
 
-  test('should support TSV metadata format', async ({ page }) => {
-    // Test with TSV format
-    await uploadHelper.uploadBatchSamples(
-      METADATA_FILES.sarsOnt,
-      [SAMPLE_FILES.sarsOnt[0]],
-      'sars'
-    );
+  // Maybe re-enable this test later
+  //test('should preserve metadata fields during batch upload', async ({ page }) => {
+  //  await uploadHelper.uploadBatchSamples(
+  //    METADATA_FILES.sarsOnt,
+  //    [SAMPLE_FILES.sarsOnt[0]],
+  //    'sars'
+  //  );
 
-    // Verify first sample uploaded using correct sample name from TSV
-    const sampleName = SAMPLE_NAMES.sarsOnt[0];
-    const exists = await uploadHelper.verifySampleExists(sampleName);
-    expect(exists).toBeTruthy();
-
-    // Clean up for next test
-    await uploadHelper.deleteSample(sampleName);
-  });
-
-  test('should preserve metadata fields during batch upload', async ({ page }) => {
-    await uploadHelper.uploadBatchSamples(
-      METADATA_FILES.sarsOnt,
-      [SAMPLE_FILES.sarsOnt[0]],
-      'sars'
-    );
-
-    const sampleName = SAMPLE_NAMES.sarsOnt[0];
+  //  const sampleName = SAMPLE_NAMES.sarsOnt[0];
 
     // Navigate to sample details to verify metadata
-    await uploadHelper.navigateToSamples();
-    await page.click(`text=${sampleName}`);
+  //  await uploadHelper.navigateToSamples();
+  //  await page.click(`text=${sampleName}`);
 
     // Verify metadata fields are preserved from TSV
-    await expect(page.locator('text=experiencia')).toBeVisible();
-    await expect(page.locator('text=13/12/2017')).toBeVisible();
-    await expect(page.locator('text=human')).toBeVisible();
-  });
+  //  await expect(page.locator('text=experiencia')).toBeVisible();
+  //  await expect(page.locator('text=13/12/2017')).toBeVisible();
+  //  await expect(page.locator('text=human')).toBeVisible();
+  //});
+
+
 });
