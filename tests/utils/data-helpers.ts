@@ -200,11 +200,17 @@ export class ProjectHelper {
   constructor(private page: Page) {}
 
   async navigateToProjects() {
-    await this.page.click('text=Projects');
+    await this.page.click('a[href="/managing_files/project-index"].nav-link');
+    await this.page.waitForLoadState('networkidle');
+    
+    // TODO This should always work, but try a different way
+    await this.page.locator('text=Projects').nth(2).click();
+    //await this.page.click('a[href="/managing_files/project/projects"].nav-link');
+    //await this.page.click('text=Projects');
     await this.page.waitForLoadState('networkidle');
   }
 
-  async createProject(projectName: string, referenceName: string, pipelineType = 'INSaFLU Full Pipeline') {
+  async createProject(projectName: string, referenceName: string, pipelineType = 'Snippy') {
     await this.navigateToProjects();
 
     // Click "Create project"
@@ -215,36 +221,63 @@ export class ProjectHelper {
     await this.page.fill('input[name*="name"], input[id*="name"]', projectName);
 
     // Select reference sequence
-    await this.page.selectOption('select[name*="reference"], select[id*="reference"]', referenceName);
+    await this.page.fill('input[name*="search_references"], input[id*="search_form_id"]', referenceName);
+    // Submit the form to guarantee we have the reference selectable  
+    await this.page.click('button:has-text("Search"), input[type="submit"]');
+
+    // Select reference sequence
+    //await this.page.selectOption('select[name*="select_ref"], select[id*="reference"]', referenceName);
+    await this.page.check('input[type*="checkbox"]');
 
     // Select pipeline type
-    await this.page.selectOption('select[name*="pipeline"], select[id*="pipeline"]', pipelineType);
+    //await this.page.selectOption('select[name*="pipeline"], select[id*="pipeline"]', pipelineType);
 
     // Submit the form
     await this.page.click('button:has-text("Create"), input[type="submit"]');
 
     // Wait for project creation
-    await this.page.waitForURL('**/projects**', { timeout: 10000 });
+    //await this.page.waitForURL('**/projects**', { timeout: 1000 });
+    await this.page.waitForSelector(`text=Project '${projectName}' was created successfully`, { timeout: 1000 });
+
+    await this.page.click(`a[value="${pipelineType}"]`);
+    await this.page.waitForLoadState('networkidle');
+
+    await this.navigateToProjects();
+
   }
 
   async addSamplesToProject(projectName: string, sampleNames: string[]) {
     await this.navigateToProjects();
 
-    // Find and click on the project
-    await this.page.click(`text=${projectName}`);
+     // Select reference sequence
+    await this.page.fill('input[name*="search_projects"], input[id*="search_form_id"]', projectName);
+    // Submit the form to guarantee we have the reference selectable  
+    await this.page.click('button:has-text("Search"), input[type="submit"]');   
+
+    // Find and click on the project (click on the last)
+    await this.page.locator('text=Add').last().click();
     await this.page.waitForLoadState('networkidle');
 
-    // Click "Add Samples"
-    await this.page.click('text=Add Samples');
+    await this.page.locator('text=Exit').click();
     await this.page.waitForLoadState('networkidle');
 
     // Select samples
     for (const sampleName of sampleNames) {
-      await this.page.check(`input[type="checkbox"][value*="${sampleName}"]`);
+      await this.page.fill('input[name*="search_add_project_sample"], input[id*="search_form_id"]', sampleName);
+      // Submit the form to guarantee we have the reference selectable  
+      await this.page.click('button:has-text("Search"), input[type="submit"]');  
+      await this.page.waitForLoadState('networkidle');
+
+      await this.page.click('input[name*="select_ref"]');
+
     }
 
+    await this.page.fill('input[name*="search_add_project_sample"], input[id*="search_form_id"]', "");
+    await this.page.click('button:has-text("Search"), input[type="submit"]');
+    await this.page.waitForLoadState('networkidle');
+
     // Submit selection
-    await this.page.click('button:has-text("Add"), input[type="submit"]');
+    await this.page.click('button:has-text("Add all selected samples"), input[type="submit"]');
 
     // Wait for samples to be added
     await this.page.waitForTimeout(2000);
