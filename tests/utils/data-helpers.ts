@@ -352,30 +352,39 @@ export class DatasetHelper {
     await this.page.selectOption('select[name*="build"], select[id*="build"]', buildType);
 
     // Submit the form
-    await this.page.click('button:has-text("Create"), input[type="submit"]');
+    // await this.page.click('button:has-text("Add"), button[id="id-save-button"]');
+    await this.page.getByRole('button', { name: 'Add', exact: true }).click();
+    await this.page.waitForLoadState('networkidle');
 
     // Wait for dataset creation
-    await this.page.waitForURL('**/datasets**', { timeout: 10000 });
+    await this.page.waitForTimeout(2000);
+    //await this.page.waitForURL('**/datasets**', { timeout: 10000 });
   }
 
-  async addSamplesToDataset(datasetName: string, sampleNames: string[]) {
+  async addProjectSamplesToDataset(datasetName: string, projectName: string) {
     await this.navigateToDatasets();
 
     // Find and click on the dataset
-    await this.page.click(`text=${datasetName}`);
+    // await this.page.click(`text=${datasetName}`);
+    // await this.page.waitForLoadState('networkidle');
+
+    await this.page.fill('input[name*="search_datasets"], input[id*="search_form_id"]', datasetName);
+    await this.page.click('button:has-text("Search"), input[type="submit"]');  
     await this.page.waitForLoadState('networkidle');
 
-    // Click "Add Samples"
-    await this.page.click('text=Add Samples');
+    await this.page.click('text=Add Sequences');
     await this.page.waitForLoadState('networkidle');
 
-    // Select samples
-    for (const sampleName of sampleNames) {
-      await this.page.check(`input[type="checkbox"][value*="${sampleName}"]`);
-    }
+    await this.page.click('text=Add Consensus from Projects');
+    await this.page.waitForLoadState('networkidle');
+
+    await this.page.fill('input[name*="search_consensus"], input[id*="search_form_id"]', projectName);
+    await this.page.click('button:has-text("Search"), input[type="submit"]');  
+    await this.page.waitForLoadState('networkidle');
 
     // Submit selection
-    await this.page.click('button:has-text("Add"), input[type="submit"]');
+    await this.page.click('button:has-text("Add 1 project"), input[type="submit"]');
+    await this.page.waitForLoadState('networkidle');
     await this.page.waitForTimeout(2000);
   }
 
