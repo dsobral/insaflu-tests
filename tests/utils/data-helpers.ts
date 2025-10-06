@@ -403,14 +403,25 @@ export class DatasetHelper {
     await this.page.waitForTimeout(2000);
   }
 
-  async buildDataset(datasetName: string) {
-    await this.navigateToDatasets();
-    await this.page.click(`text=${datasetName}`);
+  // Assumes you are already on the datasets page
+  async selectDataset(datasetName: string) {
+    await this.page.fill('input[name*="search_datasets"], input[id*="search_form_id"]', datasetName);
+    await this.page.click('button:has-text("Search"), input[type="submit"]');  
     await this.page.waitForLoadState('networkidle');
 
+  }
+
+  async buildDataset(datasetName: string) {
+
+    await this.navigateToDatasets();
+    
+    await this.selectDataset(datasetName);
+    
     // Click build button (hourglass icon)
-    await this.page.click('button[title*="build"], button:has-text("Build"), .fa-hourglass');
-    await this.page.waitForTimeout(2000);
+    await this.page.click('button[title*="Rebuild Dataset Results"], .fa-flask');
+    await this.page.click('button:has-text("Build NextStrain"), input[type="submit"]');  
+    await this.page.waitForLoadState('networkidle')
+
   }
 
   async deleteDataset(datasetName: string) {

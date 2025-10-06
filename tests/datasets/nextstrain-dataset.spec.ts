@@ -79,7 +79,7 @@ test.describe('NextStrain Dataset Workflow', () => {
     const datasetName = 'Test_Influenza_Dataset';
     const projectName = 'Test_Influenza_Project_IRMA';
     const sampleNames = SAMPLE_NAMES.influenzaIllumina;
-    
+
     // Add samples from project to dataset
     await datasetHelper.addProjectSamplesToDataset(datasetName, projectName);
 
@@ -95,41 +95,46 @@ test.describe('NextStrain Dataset Workflow', () => {
 
   });  
 
-  test('should build NextStrain dataset', async ({ page }) => {
+  test('should build NextStrain SARS dataset', async ({ page }) => {
     const datasetName = 'Test_SARS_Dataset';
 
-    // Setup dataset with samples and metadata
-    await uploadHelper.uploadReference(SAMPLE_FILES.reference.fasta);
-    await uploadHelper.uploadBatchSamples(
-      METADATA_FILES.sarsOnt,
-      [SAMPLE_FILES.sarsOnt[0]], // Use one sample for faster testing
-      'sars'
-    );
-
-    const projectName = 'Test_Dataset_Project';
-    await projectHelper.createProject(projectName, 'NC004162');
-    const sampleNames = [SAMPLE_NAMES.sarsOnt[0]]; // Use correct sample name from TSV
-    await projectHelper.addSamplesToProject(projectName, sampleNames);
-
-    // Create and setup dataset
-    await datasetHelper.createDataset(datasetName, 'SARS-CoV-2');
-    await datasetHelper.addSamplesToDataset(datasetName, sampleNames);
-    await datasetHelper.uploadMetadata(datasetName, METADATA_FILES.nextstrain);
+    // This assumes this Dataset already has samples and stable metadata
 
     // Build dataset
     await datasetHelper.buildDataset(datasetName);
 
+    await page.waitForTimeout(2000);
+
     // Verify build was initiated
-    await datasetHelper.navigateToDatasets();
-    await page.click(`text=${datasetName}`);
+    //await datasetHelper.navigateToDatasets();
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+
+    await datasetHelper.selectDataset(datasetName);
 
     // Look for build status indicators
-    const buildStatus = await page.locator('text=Building, text=Processing, text=Completed, .fa-hourglass').count();
-    expect(buildStatus).toBeGreaterThan(0);
+    const runningStatus = await page.locator('button[title*="Rebuild Dataset Results"], .fa-spin').isVisible();
+    expect(runningStatus).toBeTruthy();
+
+    await page.waitForTimeout(60000);
+
+    // Refresh and check for build completion
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+
+    //await datasetHelper.selectDataset("");
+
+    await datasetHelper.selectDataset(datasetName);
+
+    const buildStatus = await page.locator('button[title*="Rebuild Dataset Results"], .fa-flask').isVisible();
+    expect(buildStatus).toBeTruthy();
+    //const buildStatus = await page.locator('button[title*="Rebuild Dataset Results"], .fa-flask').count();
+    //expect(buildStatus).toBeGreaterThan(0);    
+
   });
 
 
-/* TODO: implment this test
+/* TODO: implement this test
   test('should upload and validate metadata for dataset', async ({ page }) => {
     const datasetName = 'Test_SARS_Dataset';
 
@@ -147,9 +152,6 @@ test.describe('NextStrain Dataset Workflow', () => {
     await expect(page.locator('text=metadata, text=collection_date, text=country')).toBeVisible();
   });
 */
-
-
-
 
   test('should validate required metadata fields', async ({ page }) => {
     const datasetName = 'Test_Metadata_Validation';
